@@ -8,7 +8,7 @@ function Home() {
       <nav className="py-6 flex flex-col sm:items-baseline md:flex-row md:items-center md:justify-between">
         <div>
           <NavLink className="flex gap-2 items-center" to='/' end>
-            <img src="public\newspaper.svg" alt="Site Logo" width={40} height={40} />
+            <img src="/newspaper.svg" alt="Site Logo" width={40} height={40} />
             <h1 className="font-bold">Blog Website</h1>
           </NavLink>
         </div>
