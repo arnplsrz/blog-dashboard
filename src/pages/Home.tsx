@@ -1,3 +1,4 @@
+import { Button } from "@mui/material"
 import { Link, NavLink } from "react-router"
 import { Fragment } from "react/jsx-runtime"
 
@@ -13,8 +14,12 @@ function Home() {
           </NavLink>
         </div>
         <div className="flex gap-2">
-          <Link to='/login'>Login</Link>
-          <Link to='/register'>Register</Link>
+          <Button variant="contained">
+            <Link to='/login'>Login</Link>
+          </Button>
+          <Button variant="outlined">
+            <Link to='/register'>Register</Link>
+          </Button>
           <Link to='/dashboard'>Dashboard</Link>
         </div>
       </nav>

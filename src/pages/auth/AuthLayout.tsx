@@ -1,11 +1,19 @@
+import { Box } from "@mui/material"
 import { Outlet } from "react-router"
 
 function AuthLayout() {
   return (
-    <div className="bg-red-100">
-      <h1>This is AuthLayout</h1>
+    <Box
+      component="main"
+      sx={{
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        bgcolor: "grey.100",
+      }}
+    >
       <Outlet />
-    </div>
+    </Box>
   )
 }
 
