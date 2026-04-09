@@ -14,6 +14,9 @@ importers:
       '@fontsource-variable/noto-sans':
         specifier: ^5.2.10
         version: 5.2.10
+      '@fontsource-variable/playfair-display':
+        specifier: ^5.2.8
+        version: 5.2.8
       '@tailwindcss/vite':
         specifier: ^4.1.18
         version: 4.1.18(vite@7.3.1(@types/node@24.10.7)(jiti@2.6.1)(lightningcss@1.30.2))
@@ -474,6 +477,9 @@ packages:
 
   '@fontsource-variable/noto-sans@5.2.10':
     resolution: {integrity: sha512-wyFgKkFu7jki5kEL8qv7avjQ8rxHX0J/nhLWvbR9T0hOH1HRKZEvb9EW9lMjZfWHHfEzKkYf5J+NadwgCS7TXA==}
+
+  '@fontsource-variable/playfair-display@5.2.8':
+    resolution: {integrity: sha512-ZzVIXPOrL85yyOvZYoBzUszIJM+xKkHqni4IYn2CVLaGQQdJR8sBeC8yFNgjxSJ7ludTwta8qpULeOFuk5X75A==}
 
   '@hono/node-server@1.19.13':
     resolution: {integrity: sha512-TsQLe4i2gvoTtrHje625ngThGBySOgSK3Xo2XRYOdqGN1teR8+I7vchQC46uLJi8OF62YTYA3AhSpumtkhsaKQ==}
@@ -2892,6 +2898,8 @@ snapshots:
   '@floating-ui/utils@0.2.11': {}
 
   '@fontsource-variable/noto-sans@5.2.10': {}
+
+  '@fontsource-variable/playfair-display@5.2.8': {}
 
   '@hono/node-server@1.19.13(hono@4.12.12)':
     dependencies:

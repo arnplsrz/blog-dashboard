@@ -1,34 +1,40 @@
-import { Button } from "@mui/material"
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
 import { Link, NavLink } from "react-router"
 import { Fragment } from "react/jsx-runtime"
 
 function Home() {
+  const [user, setUser] = useState(true);
 
   return (
     <Fragment>
-      <nav className="py-6 flex flex-col sm:items-baseline md:flex-row md:items-center md:justify-between">
-        <div>
-          <NavLink className="flex gap-2 items-center" to='/' end>
-            <img src="/newspaper.svg" alt="Site Logo" width={40} height={40} />
-            <h1 className="font-bold">Blog Website</h1>
+      <header className="px-6">
+        <section className="h-12 flex justify-end items-center gap-2">
+          {user ? (
+            <>
+              <Button>
+                <Link to='/login'>Login</Link>
+              </Button>
+              <Button>
+                <Link to='/register'>Register</Link>
+              </Button>
+            </>
+            ) : (
+              <Button>
+                <Link to='/dashboard'>Dashboard</Link>
+              </Button>
+            )
+          }
+        </section>
+        <section className="h-16">
+          <NavLink className="flex gap-2 justify-center items-center" to='/' end>
+            <h1 className="font-extrabold font-heading italic text-3xl">Blog Website</h1>
           </NavLink>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="contained">
-            <Link to='/login'>Login</Link>
-          </Button>
-          <Button variant="outlined">
-            <Link to='/register'>Register</Link>
-          </Button>
-          <Link to='/dashboard'>Dashboard</Link>
-        </div>
-      </nav>
-      <main className="flex flex-col gap-12">
-        <header>
-          <p>arnplsrz Blog</p>
-          <h2>Featured</h2>
-          <p>All featured articles across categories</p>
-        </header>
+        </section>
+        <nav className="h-12 flex flex-row justify-between items-center">
+        </nav>
+      </header>
+      <main className="px-6 flex flex-col gap-12">
         <section className="grid xl:grid-cols-2 md:grid-cols-none gap-2">
           <article>
             <img src="https://placehold.co/450x250" alt="Placeholder image" />
@@ -85,7 +91,7 @@ function Home() {
           </article>
         </section>
       </main>
-      <footer className="py-6">
+      <footer className="px-6 h-16">
         <h2>Blog Website</h2>
         <p>An admin web app for managing blog posts from an external API, built using React, Tailwind CSS, and TypeScript</p>
       </footer>
