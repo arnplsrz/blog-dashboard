@@ -8,33 +8,45 @@ function Home() {
 
   return (
     <Fragment>
-      <header className="px-6">
-        <section className="h-12 flex justify-end items-center gap-2">
-          {user ? (
-            <>
-              <Button>
-                <Link to='/login'>Login</Link>
-              </Button>
-              <Button>
-                <Link to='/register'>Register</Link>
-              </Button>
-            </>
-            ) : (
-              <Button>
-                <Link to='/dashboard'>Dashboard</Link>
-              </Button>
-            )
-          }
-        </section>
-        <section className="h-16">
-          <NavLink className="flex gap-2 justify-center items-center" to='/' end>
-            <h1 className="font-extrabold font-heading italic text-3xl">Blog Website</h1>
-          </NavLink>
-        </section>
-        <nav className="h-12 flex flex-row justify-between items-center">
-        </nav>
+      <header className="px-12 py-8 bg-black text-white flex justify-between">
+        <ul className="flex gap-6">
+          <li>Personal</li>
+          <li>Technology</li>
+          <li>Lifestyle</li>
+          <li>Health & Fitness</li>
+          <li>Food</li>
+          <li>Travel</li>
+          <li>Music</li>
+        </ul>
+        {user ? (
+          <div className="flex gap-2">
+            <Button variant="ghost">
+              <Link to='/login'>Login</Link>
+            </Button>
+            <Button variant="secondary">
+              <Link to='/register'>Register</Link>
+            </Button>
+          </div>
+          ) : (
+            <Button>
+              <Link to='/dashboard'>Dashboard</Link>
+            </Button>
+          )
+        }
       </header>
-      <main className="px-6 flex flex-col gap-12">
+      <nav className="h-auto mx-6 pt-12 pb-4 flex gap-4 flex-col items-center border-b-3 border-double border-black">
+        <NavLink className="flex gap-2 justify-center items-center" to='/' end>
+          <h1 className="font-extrabold font-heading text-9xl">Blog Website</h1>
+        </NavLink>
+        <ul className="w-full px-4 flex gap-4 justify-between items-center">
+          <li>Article 1</li>
+          <li>Article 2</li>
+          <li>Article 3</li>
+          <li>Article 4</li>
+          <li>Article 5</li>
+        </ul>
+      </nav>
+      <main className="px-6 py-9 flex flex-1 flex-col gap-12">
         <section className="grid xl:grid-cols-2 md:grid-cols-none gap-2">
           <article>
             <img src="https://placehold.co/450x250" alt="Placeholder image" />
@@ -91,7 +103,7 @@ function Home() {
           </article>
         </section>
       </main>
-      <footer className="px-6 h-16">
+      <footer className="px-6 py-12 bg-black text-white">
         <h2>Blog Website</h2>
         <p>An admin web app for managing blog posts from an external API, built using React, Tailwind CSS, and TypeScript</p>
       </footer>
