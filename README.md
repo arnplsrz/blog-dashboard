@@ -2,6 +2,22 @@
 
 An admin web app for managing blog posts from an external API, built using React, Tailwind CSS, and TypeScript 
 
+## Tech Stack
+
+- **UI Library**: React 19
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS 4
+- **UI Components**: shadcn/ui
+- **Icons**: Lucide React
+- **State Management**: React Context API
+- **Package Manager**: pnpm
+- **Deployment**: Vercel
+
+## Prequisites
+
+1. Backend server running on <http://localhost:3000>
+2. PostgreSQL database configured and migrated
+
 ## Acknowledgements
 
 ### Design
