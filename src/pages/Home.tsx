@@ -4,7 +4,7 @@ import { Link, NavLink } from "react-router"
 import { Fragment } from "react/jsx-runtime"
 
 function Home() {
-  const [user, setUser] = useState(true);
+  const [user] = useState(true);
 
   return (
     <Fragment>
