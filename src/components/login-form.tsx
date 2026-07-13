@@ -14,11 +14,59 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import z from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useState } from "react"
+import { toast } from "sonner"
+import { useForm, type SubmitHandler } from "react-hook-form"
+
+const loginSchema = z.object({
+  email: z.email("Invalid email address"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+})
+
+type LoginInput = z.infer<typeof loginSchema>
+
+const API_URL = import.meta.env.VITE_API_URL;
+const IS_DEV = import.meta.env.DEV;
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset
+  } = useForm<LoginInput>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: IS_DEV ? "juandelacruz@example.com" : "",
+      password: IS_DEV ? "12345678" : "",
+    }
+  });
+
+  const onSubmit: SubmitHandler<LoginInput> = async (data: LoginInput) => {
+    console.log("Data:", data)
+    console.log("API_URL:", API_URL)
+
+    setIsLoading(true);
+
+    try {
+      // TODO
+      // await login(data.email, data.password);
+      reset();
+    } catch (error: any) {
+      toast.error(error instanceof Error ? error.message : "Failed to login");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
@@ -29,7 +77,7 @@ export function LoginForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form>
+          <form onSubmit={handleSubmit(onSubmit)}>
             <FieldGroup>
               <Field>
                 <FieldLabel htmlFor="email">Email</FieldLabel>
@@ -37,17 +85,42 @@ export function LoginForm({
                   id="email"
                   type="email"
                   placeholder="m@example.com"
+                  {...register("email")}
+                  aria-invalid={!!errors.password}
+                  disabled={isLoading}
                   required
                 />
+                {errors.password && (
+                  <FieldDescription>
+                    {errors.password.message}
+                  </FieldDescription>
+                )}
               </Field>
               <Field>
                 <div className="flex items-center">
                   <FieldLabel htmlFor="password">Password</FieldLabel>
                 </div>
-                <Input id="password" type="password" required />
+                <Input
+                  id="password"
+                  type="password"
+                  {...register("password")}
+                  aria-invalid={!!errors.password}
+                  disabled={isLoading}
+                  required
+                />
+                {errors.password && (
+                  <FieldDescription>
+                    {errors.password.message}
+                  </FieldDescription>
+                )}
               </Field>
               <Field>
-                <Button type="submit">Login</Button>
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Logging in" : "Login"}
+                </Button>
                 <FieldDescription className="text-center">
                   Don&apos;t have an account? <a href="/register">Sign up</a>
                 </FieldDescription>
