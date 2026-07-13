@@ -31,8 +31,8 @@ const registerSchema = z.object({
 
 type RegisterInput = z.infer<typeof registerSchema>;
 
-const VITE_API_URL = import.meta.env.VITE_API_URL;
-const isDev = import.meta.env.DEV;
+const API_URL = import.meta.env.VITE_API_URL;
+const IS_DEV = import.meta.env.DEV;
 
 export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -45,20 +45,20 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
   } = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      name: isDev ? "Juan Dela Cruz" : "",
-      email: isDev ? "juandelacruz@example.com" : "",
-      password: isDev ? "12345678" : "",
-      confirmPassword: isDev ? "12345678" : "",
+      name: IS_DEV ? "Juan Dela Cruz" : "",
+      email: IS_DEV ? "juandelacruz@example.com" : "",
+      password: IS_DEV ? "12345678" : "",
+      confirmPassword: IS_DEV ? "12345678" : "",
     }
   });
 
-  const onSubmit: SubmitHandler<RegisterInput> = async (data) => {
-    console.log("Data", data);
+  const onSubmit: SubmitHandler<RegisterInput> = async (data: RegisterInput) => {
+    console.log("Data:", data);
     
     setIsLoading(true);
 
     try {
-      const response = await fetch(`http://localhost:3000/api/auth/register`, {
+      const response = await fetch(`${API_URL}/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json"},
         body: JSON.stringify({ 
