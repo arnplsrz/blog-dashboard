@@ -57,11 +57,33 @@ export function LoginForm({
     setIsLoading(true);
 
     try {
-      // TODO
-      // await login(data.email, data.password);
+      const response = await fetch(`${API_URL}/api/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json"},
+        body: JSON.stringify({ 
+          email: data.email,
+          password: data.password
+        }),
+        credentials: "include",
+        signal: AbortSignal.timeout(5000)
+      });
+
+      console.log("Response:", response);
+      
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.log("errorData", errorData)
+        throw new Error(errorData.error);
+      }
+
       reset();
     } catch (error: any) {
-      toast.error(error instanceof Error ? error.message : "Failed to login");
+      if (error.name === 'TimeoutError') {
+        toast.error("Please check your network connection")
+      } else {
+        toast.error(error.message || "Failed to login");
+      }
     } finally {
       setIsLoading(false);
     }
