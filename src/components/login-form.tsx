@@ -19,6 +19,8 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useState } from "react"
 import { toast } from "sonner"
 import { useForm, type SubmitHandler } from "react-hook-form"
+import { Link, useNavigate } from "react-router"
+import { useAuth } from "@/lib/auth-context"
 
 const loginSchema = z.object({
   email: z.email("Invalid email address"),
@@ -36,6 +38,8 @@ export function LoginForm({
 }: React.ComponentProps<"div">) {
 
   const [isLoading, setIsLoading] = useState<boolean>(false)
+  const { login } = useAuth()
+  const navigate = useNavigate()
 
   const {
     register,
@@ -51,33 +55,29 @@ export function LoginForm({
   });
 
   const onSubmit: SubmitHandler<LoginInput> = async (data: LoginInput) => {
-    console.log("Data:", data)
-    console.log("API_URL:", API_URL)
-
     setIsLoading(true);
 
     try {
       const response = await fetch(`${API_URL}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json"},
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           email: data.email,
           password: data.password
         }),
-        credentials: "include",
         signal: AbortSignal.timeout(5000)
       });
 
-      console.log("Response:", response);
-      
-
       if (!response.ok) {
         const errorData = await response.json();
-        console.log("errorData", errorData)
         throw new Error(errorData.error);
       }
 
+      const { token, user } = await response.json();
+
       reset();
+      login(token, user);
+      navigate("/");
     } catch (error: any) {
       if (error.name === 'TimeoutError') {
         toast.error("Please check your network connection")
@@ -108,13 +108,13 @@ export function LoginForm({
                   type="email"
                   placeholder="m@example.com"
                   {...register("email")}
-                  aria-invalid={!!errors.password}
+                  aria-invalid={!!errors.email}
                   disabled={isLoading}
                   required
                 />
-                {errors.password && (
+                {errors.email && (
                   <FieldDescription>
-                    {errors.password.message}
+                    {errors.email.message}
                   </FieldDescription>
                 )}
               </Field>
@@ -144,7 +144,7 @@ export function LoginForm({
                   {isLoading ? "Logging in" : "Login"}
                 </Button>
                 <FieldDescription className="text-center">
-                  Don&apos;t have an account? <a href="/register">Sign up</a>
+                  Don&apos;t have an account? <Link to="/register">Sign up</Link>
                 </FieldDescription>
               </Field>
             </FieldGroup>

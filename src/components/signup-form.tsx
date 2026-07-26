@@ -18,6 +18,8 @@ import { z } from "zod"
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner"
+import { Link, useNavigate } from "react-router"
+import { useAuth } from "@/lib/auth-context"
 
 const registerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -36,6 +38,8 @@ const IS_DEV = import.meta.env.DEV;
 
 export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
   const {
     register,
@@ -53,36 +57,59 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
   });
 
   const onSubmit: SubmitHandler<RegisterInput> = async (data: RegisterInput) => {
-    console.log("Data:", data);
-    
     setIsLoading(true);
 
     try {
       const response = await fetch(`${API_URL}/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json"},
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           name: data.name,
           email: data.email,
           password: data.password
         }),
-        credentials: "include",
+        signal: AbortSignal.timeout(5000)
       });
-
-      console.log("Response:", response);
-      
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.log("errorData", errorData)
         throw new Error(errorData.error);
       }
 
-      toast("Account created successfully");
       reset();
+
+      // ponytail: register returns a token signed as { userId }, but the API's
+      // passport strategy only reads `sub` — so that token 401s on every
+      // protected route. Log in again to get a usable one. Drop this second
+      // request once blog-api signs register tokens the same way login does.
+      const loginResponse = await fetch(`${API_URL}/api/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json"},
+        body: JSON.stringify({
+          email: data.email,
+          password: data.password
+        }),
+        signal: AbortSignal.timeout(5000)
+      });
+
+      if (!loginResponse.ok) {
+        // The account exists — don't report this as a registration failure.
+        toast("Account created successfully. Please sign in.");
+        navigate("/login");
+        return;
+      }
+
+      const { token, user } = await loginResponse.json();
+
+      toast("Account created successfully");
+      login(token, user);
+      navigate("/");
     } catch (error: any) {
-      console.log("error", error)
-      toast(error instanceof Error ? error.message : "Failed to register")
+      if (error.name === 'TimeoutError') {
+        toast.error("Please check your network connection")
+      } else {
+        toast(error instanceof Error ? error.message : "Failed to register")
+      }
     } finally {
       setIsLoading(false);
     }
@@ -182,7 +209,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
                   {isLoading ? "Registering" : "Create Account"}
                 </Button>
                 <FieldDescription className="px-6 text-center">
-                  Already have an account? <a href="/login" aria-disabled={isLoading}>Sign in</a>
+                  Already have an account? <Link to="/login" aria-disabled={isLoading}>Sign in</Link>
                 </FieldDescription>
               </Field>
             </FieldGroup>

@@ -1,10 +1,10 @@
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useAuth } from "@/lib/auth-context";
 import { Link, NavLink } from "react-router"
 import { Fragment } from "react/jsx-runtime"
 
 function Home() {
-  const [user] = useState(true);
+  const { user } = useAuth();
 
   return (
     <Fragment>
@@ -19,6 +19,10 @@ function Home() {
           <li>Music</li>
         </ul>
         {user ? (
+          <Button>
+            <Link to="/dashboard">Dashboard</Link>
+          </Button>
+        ) : (
           <div className="flex gap-2">
             <Button variant="ghost">
               <Link to="/login">Login</Link>
@@ -27,10 +31,6 @@ function Home() {
               <Link to="/register">Register</Link>
             </Button>
           </div>
-        ) : (
-          <Button>
-            <Link to="/dashboard">Dashboard</Link>
-          </Button>
         )}
       </header>
       <nav className="h-auto mx-6 pt-12 pb-4 flex gap-4 flex-col items-center border-b-3 border-double border-black">
