@@ -82,7 +82,7 @@ export function LoginForm({
       if (error.name === 'TimeoutError') {
         toast.error("Please check your network connection")
       } else {
-        toast.error(error.message || "Failed to login");
+        toast.error(error instanceof Error ? error.message : "Failed to login");
       }
     } finally {
       setIsLoading(false);

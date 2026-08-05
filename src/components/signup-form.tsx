@@ -108,7 +108,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
       if (error.name === 'TimeoutError') {
         toast.error("Please check your network connection")
       } else {
-        toast(error instanceof Error ? error.message : "Failed to register")
+        toast.error(error instanceof Error ? error.message : "Failed to register")
       }
     } finally {
       setIsLoading(false);
