@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth-context";
 import { Link, NavLink } from "react-router"
 import { Fragment } from "react/jsx-runtime"
@@ -24,12 +24,8 @@ function Home() {
           </Button>
         ) : (
           <div className="flex gap-2">
-            <Button variant="ghost">
-              <Link to="/login">Login</Link>
-            </Button>
-            <Button variant="secondary">
-              <Link to="/register">Register</Link>
-            </Button>
+            <Link to="/login" className={buttonVariants({ variant: 'ghost' })}>Login</Link>
+            <Link to="/register" className={buttonVariants({ variant: 'secondary' })}>Register</Link>
           </div>
         )}
       </header>
