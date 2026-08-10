@@ -78,32 +78,27 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
 
       reset();
 
-      // ponytail: register returns a token signed as { userId }, but the API's
-      // passport strategy only reads `sub` — so that token 401s on every
-      // protected route. Log in again to get a usable one. Drop this second
-      // request once blog-api signs register tokens the same way login does.
-      const loginResponse = await fetch(`${API_URL}/api/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json"},
-        body: JSON.stringify({
-          email: data.email,
-          password: data.password
-        }),
-        signal: AbortSignal.timeout(5000)
-      });
+      try {
+        const loginResponse = await fetch(`${API_URL}/api/auth/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json"},
+          body: JSON.stringify({
+            email: data.email,
+            password: data.password
+          }),
+          signal: AbortSignal.timeout(5000)
+        });
 
-      if (!loginResponse.ok) {
-        // The account exists — don't report this as a registration failure.
+        if (!loginResponse.ok) throw new Error("post-registration login failed");
+
+        const { token, user } = await loginResponse.json();
+        toast("Account created successfully");
+        login(token, user);
+        navigate("/");
+      } catch {
         toast("Account created successfully. Please sign in.");
         navigate("/login");
-        return;
       }
-
-      const { token, user } = await loginResponse.json();
-
-      toast("Account created successfully");
-      login(token, user);
-      navigate("/");
     } catch (error: any) {
       if (error.name === 'TimeoutError') {
         toast.error("Please check your network connection")
