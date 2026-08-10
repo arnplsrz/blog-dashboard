@@ -28,17 +28,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   useEffect(() => {
-    const stored = localStorage.getItem(TOKEN_KEY)
-    if (!stored) return
+    if (!token) {
+      setUser(null)
+      setIsLoading(false)
+      return
+    }
 
     const controller = new AbortController()
     const { signal } = controller
+    let timedOut = false
 
+    const timeoutId = setTimeout(() => {
+      timedOut = true
+      controller.abort()
+    }, 5000)
+    
     const fetchUser = async () => {
       try {
         const response = await fetch(`${API_URL}/api/users/me`, {
           method: "GET",
-          headers: { "Authorization": `Bearer ${stored}` },
+          headers: { "Authorization": `Bearer ${token}` },
           signal
         })
 
@@ -51,10 +60,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const { user } = await response.json()
         setUser(user)
       } catch (error) {
-        if (error instanceof Error && error.name === "AbortError") return
+        if (error instanceof Error && error.name === "AbortError") {
+          if (timedOut) {
+            toast.error("The server took too long to respond")
+          }
+          return
+        }
+
         toast.error("Could not reach the server")
       } finally {
-        if (!signal.aborted) setIsLoading(false)
+        clearTimeout(timeoutId)
+
+        if (!signal.aborted) {
+          setIsLoading(false)
+        }
       }
     }
 
