@@ -19,9 +19,7 @@ function Home() {
           <li>Music</li>
         </ul>
         {user ? (
-          <Button>
-            <Link to="/dashboard">Dashboard</Link>
-          </Button>
+          <Link to="/dashboard" className={buttonVariants()}>Dashboard</Link>
         ) : (
           <div className="flex gap-2">
             <Link to="/login" className={buttonVariants({ variant: 'ghost' })}>Login</Link>
