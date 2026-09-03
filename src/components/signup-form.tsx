@@ -73,7 +73,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error);
+        throw new Error(errorData.error ?? "Failed to sign-up");
       }
 
       reset();

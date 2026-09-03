@@ -70,7 +70,7 @@ export function LoginForm({
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error);
+        throw new Error(errorData.error ?? "Failed to login");
       }
 
       const { token, user } = await response.json();
