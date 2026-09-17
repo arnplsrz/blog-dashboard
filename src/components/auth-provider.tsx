@@ -1,91 +1,96 @@
 import { useCallback, useEffect, useState, type ReactNode } from "react"
 import { Navigate, Outlet } from "react-router"
 
-import { AuthContext, TOKEN_KEY, useAuth, type User } from "@/lib/auth-context"
+import { AuthContext, useAuth, type User } from "@/lib/auth-context"
 import { Toaster, toast } from "sonner"
 
 const API_URL = import.meta.env.VITE_API_URL
 
+type Session = { accessToken: string; user: User }
+
+let refreshing: Promise<Session | null> | null = null
+
+function refreshSession() {
+  refreshing ??= fetch(`${API_URL}/api/auth/refresh`, {
+    method: "POST",
+    credentials: "include",
+    signal: AbortSignal.timeout(5000),
+  })
+    .then((response) => (response.ok ? response.json() : null))
+    .finally(() => {
+      refreshing = null
+    })
+
+  return refreshing
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [token, setToken] = useState<string | null>(() =>
-    localStorage.getItem(TOKEN_KEY)
-  )
+  const [token, setToken] = useState<string | null>(null)
   const [user, setUser] = useState<User | null>(null)
-  const [isLoading, setIsLoading] = useState<boolean>(() =>
-    Boolean(localStorage.getItem(TOKEN_KEY))
-  )
+  const [isLoading, setIsLoading] = useState<boolean>(true)
 
   const login = useCallback((token: string, user: User) => {
-    localStorage.setItem(TOKEN_KEY, token)
     setToken(token)
     setUser(user)
   }, [])
 
-  const logout = useCallback(() => {
-    localStorage.removeItem(TOKEN_KEY)
+  const logout = useCallback(async () => {
+    await fetch(`${API_URL}/api/auth/logout`, {
+      method: "POST",
+      credentials: "include",
+    }).catch(() => {})
     setToken(null)
     setUser(null)
   }, [])
 
-  useEffect(() => {
-    if (!token) {
-      setUser(null)
-      setIsLoading(false)
-      return
-    }
-
-    const controller = new AbortController()
-    const { signal } = controller
-    let timedOut = false
-
-    const timeoutId = setTimeout(() => {
-      timedOut = true
-      controller.abort()
-    }, 5000)
-    
-    const fetchUser = async () => {
-      try {
-        const response = await fetch(`${API_URL}/api/users/me`, {
-          method: "GET",
-          headers: { "Authorization": `Bearer ${token}` },
-          signal
-        })
-
-        if (!response.ok) {
-          logout()
-          toast("Your session has expired. Please sign in again.")
-          return
-        }
-
-        const { user } = await response.json()
-        setUser(user)
-      } catch (error) {
-        if (error instanceof Error && error.name === "AbortError") {
-          if (timedOut) {
-            toast.error("The server took too long to respond")
-          }
-          return
-        }
-
-        toast.error("Could not reach the server")
-      } finally {
-        clearTimeout(timeoutId)
-
-        if (!signal.aborted) {
-          setIsLoading(false)
-        }
+  const authFetch = useCallback(
+    async (input: string, init: RequestInit = {}) => {
+      const send = (accessToken: string | null) => {
+        const headers = new Headers(init.headers)
+        if (accessToken) headers.set("Authorization", `Bearer ${accessToken}`)
+        return fetch(input, { ...init, headers })
       }
-    }
 
-    fetchUser()
+      const res = await send(token)
+      if (res.status !== 401) return res
+
+      const session = await refreshSession()
+      if (!session) {
+        logout()
+        return res
+      }
+
+      login(session.accessToken, session.user)
+      return send(session.accessToken)
+    },
+    [token, login, logout]
+  )
+
+  useEffect(() => {
+    let active = true
+
+    refreshSession()
+      .then((session) => {
+        if (active && session) login(session.accessToken, session.user)
+      })
+      .catch((error) => {
+        toast.error(
+          error.name === "TimeoutError"
+            ? "The server took too long to respond"
+            : "Could not reach the server"
+        )
+      })
+      .finally(() => {
+        if (active) setIsLoading(false)
+      })
 
     return () => {
-      controller.abort()
+      active = false
     }
-  }, [logout])
+  }, [login])
 
   return (
-    <AuthContext value={{ user, token, isLoading, login, logout }}>
+    <AuthContext value={{ user, token, isLoading, login, logout, authFetch }}>
       {children}
       <Toaster />
     </AuthContext>

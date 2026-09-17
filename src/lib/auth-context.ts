@@ -12,10 +12,9 @@ export type AuthValue = {
   token: string | null
   isLoading: boolean
   login: (token: string, user: User) => void
-  logout: () => void
+  logout: () => Promise<void>
+  authFetch: (input: string, init?: RequestInit) => Promise<Response>
 }
-
-export const TOKEN_KEY = "token"
 
 export const AuthContext = createContext<AuthValue | null>(null)
 
