@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState, type ReactNode } from "react"
-import { Navigate, Outlet } from "react-router"
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react"
+import { Navigate, Outlet, useLocation } from "react-router"
 
 import { AuthContext, useAuth, type User } from "@/lib/auth-context"
 import { Toaster, toast } from "sonner"
@@ -28,8 +28,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null)
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
+  const tokenRef = useRef<string | null>(null)
 
   const login = useCallback((token: string, user: User) => {
+    tokenRef.current = token
     setToken(token)
     setUser(user)
   }, [])
@@ -39,6 +41,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       method: "POST",
       credentials: "include",
     }).catch(() => {})
+    tokenRef.current = null
     setToken(null)
     setUser(null)
   }, [])
@@ -51,10 +54,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return fetch(input, { ...init, headers })
       }
 
-      const res = await send(token)
+      const res = await send(tokenRef.current)
       if (res.status !== 401) return res
 
-      const session = await refreshSession()
+      const session = await refreshSession().catch(() => null)
       if (!session) {
         logout()
         return res
@@ -63,7 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       login(session.accessToken, session.user)
       return send(session.accessToken)
     },
-    [token, login, logout]
+    [login, logout]
   )
 
   useEffect(() => {
@@ -99,8 +102,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function ProtectedRoute() {
   const { user, isLoading } = useAuth()
+  const location = useLocation()
 
   if (isLoading) return null
 
-  return user ? <Outlet /> : <Navigate to="/login" replace />
+  if (!user) return <Navigate to="/login" replace state={{ from: location.pathname }} />
+
+  return user.role === "AUTHOR" ? <Outlet /> : <Navigate to="/" replace />
 }
