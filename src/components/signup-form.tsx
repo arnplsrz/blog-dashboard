@@ -72,7 +72,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.error ?? "Failed to sign-up");
       }
 
@@ -100,8 +100,8 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
         toast("Account created successfully. Please sign in.");
         navigate("/login");
       }
-    } catch (error: any) {
-      if (error.name === 'TimeoutError') {
+    } catch (error) {
+      if (error instanceof Error && error.name === 'TimeoutError') {
         toast.error("Please check your network connection")
       } else {
         toast.error(error instanceof Error ? error.message : "Failed to register")

@@ -19,7 +19,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useState } from "react"
 import { toast } from "sonner"
 import { useForm, type SubmitHandler } from "react-hook-form"
-import { Link, useNavigate } from "react-router"
+import { Link, useLocation, useNavigate } from "react-router"
 import { useAuth } from "@/lib/auth-context"
 
 const loginSchema = z.object({
@@ -40,6 +40,7 @@ export function LoginForm({
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const { login } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
 
   const {
     register,
@@ -70,7 +71,7 @@ export function LoginForm({
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.error ?? "Failed to login");
       }
 
@@ -78,9 +79,9 @@ export function LoginForm({
 
       reset();
       login(accessToken, user);
-      navigate("/");
-    } catch (error: any) {
-      if (error.name === 'TimeoutError') {
+      navigate(location.state?.from ?? "/", { replace: true });
+    } catch (error) {
+      if (error instanceof Error && error.name === 'TimeoutError') {
         toast.error("Please check your network connection")
       } else {
         toast.error(error instanceof Error ? error.message : "Failed to login");
