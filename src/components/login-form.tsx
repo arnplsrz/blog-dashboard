@@ -60,6 +60,7 @@ export function LoginForm({
     try {
       const response = await fetch(`${API_URL}/api/auth/login`, {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json"},
         body: JSON.stringify({
           email: data.email,
@@ -73,10 +74,10 @@ export function LoginForm({
         throw new Error(errorData.error ?? "Failed to login");
       }
 
-      const { token, user } = await response.json();
+      const { accessToken, user } = await response.json();
 
       reset();
-      login(token, user);
+      login(accessToken, user);
       navigate("/");
     } catch (error: any) {
       if (error.name === 'TimeoutError') {

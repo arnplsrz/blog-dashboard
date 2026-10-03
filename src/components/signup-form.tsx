@@ -81,6 +81,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
       try {
         const loginResponse = await fetch(`${API_URL}/api/auth/login`, {
           method: "POST",
+          credentials: "include",
           headers: { "Content-Type": "application/json"},
           body: JSON.stringify({
             email: data.email,
@@ -91,9 +92,9 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
 
         if (!loginResponse.ok) throw new Error("post-registration login failed");
 
-        const { token, user } = await loginResponse.json();
+        const { accessToken, user } = await loginResponse.json();
         toast("Account created successfully");
-        login(token, user);
+        login(accessToken, user);
         navigate("/");
       } catch {
         toast("Account created successfully. Please sign in.");

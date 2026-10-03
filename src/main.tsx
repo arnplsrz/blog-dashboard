@@ -1,18 +1,18 @@
-import { StrictMode } from 'react'
+import { lazy, StrictMode, Suspense } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Route, Routes } from 'react-router'
 
 import { AuthProvider, ProtectedRoute } from './components/auth-provider.tsx'
 import Home from './pages/Home.tsx'
 import AuthLayout from './pages/auth/AuthLayout.tsx'
-import Login from './pages/auth/Login.tsx'
-import Register from './pages/auth/Register.tsx'
-import DashboardLayout from './pages/dashboard/DashboardLayout.tsx'
-import Dashboard from './pages/dashboard/Dashboard.tsx'
-import Settings from './pages/dashboard/Settings.tsx'
-import BlogLayout from './pages/blog/BlogLayout.tsx'
-import Blog from './pages/blog/Blog.tsx'
-import EditBlog from './pages/blog/EditBlog.tsx'
+const Login = lazy(() => import('./pages/auth/Login.tsx'))
+const Register = lazy(() => import('./pages/auth/Register.tsx'))
+const DashboardLayout = lazy(() => import('./pages/dashboard/DashboardLayout.tsx'))
+const Dashboard = lazy(() => import('./pages/dashboard/Dashboard.tsx'))
+const Settings = lazy(() => import('./pages/dashboard/Settings.tsx'))
+const BlogLayout = lazy(() => import('./pages/blog/BlogLayout.tsx'))
+const Blog = lazy(() => import('./pages/blog/Blog.tsx'))
+const EditBlog = lazy(() => import('./pages/blog/EditBlog.tsx'))
 import Error from './pages/404.tsx'
 
 import './index.css'
@@ -21,6 +21,7 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
       <AuthProvider>
+        <Suspense fallback={null}>
         <Routes>
           <Route index element={<Home />} />
 
@@ -47,6 +48,7 @@ createRoot(document.getElementById('root')!).render(
 
           <Route path='*' element={<Error />}></Route>
         </Routes>
+        </Suspense>
       </AuthProvider>
     </BrowserRouter>
   </StrictMode>,

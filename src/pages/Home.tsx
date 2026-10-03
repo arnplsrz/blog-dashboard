@@ -1,4 +1,4 @@
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth-context";
 import { Link, NavLink } from "react-router"
 import { Fragment } from "react/jsx-runtime"
