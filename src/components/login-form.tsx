@@ -19,6 +19,9 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useState } from "react"
 import { toast } from "sonner"
 import { useForm, type SubmitHandler } from "react-hook-form"
+import { Link, useLocation, useNavigate } from "react-router"
+import { API_URL } from "@/lib/api"
+import { useAuth } from "@/lib/auth-context"
 
 const loginSchema = z.object({
   email: z.email("Invalid email address"),
@@ -26,8 +29,6 @@ const loginSchema = z.object({
 })
 
 type LoginInput = z.infer<typeof loginSchema>
-
-const API_URL = import.meta.env.VITE_API_URL;
 const IS_DEV = import.meta.env.DEV;
 
 export function LoginForm({
@@ -36,6 +37,9 @@ export function LoginForm({
 }: React.ComponentProps<"div">) {
 
   const [isLoading, setIsLoading] = useState<boolean>(false)
+  const { login } = useAuth()
+  const navigate = useNavigate()
+  const location = useLocation()
 
   const {
     register,
@@ -51,17 +55,36 @@ export function LoginForm({
   });
 
   const onSubmit: SubmitHandler<LoginInput> = async (data: LoginInput) => {
-    console.log("Data:", data)
-    console.log("API_URL:", API_URL)
-
     setIsLoading(true);
 
     try {
-      // TODO
-      // await login(data.email, data.password);
+      const response = await fetch(`${API_URL}/api/auth/login`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json"},
+        body: JSON.stringify({
+          email: data.email,
+          password: data.password
+        }),
+        signal: AbortSignal.timeout(5000)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error ?? "Failed to login");
+      }
+
+      const { accessToken, user } = await response.json();
+
       reset();
-    } catch (error: any) {
-      toast.error(error instanceof Error ? error.message : "Failed to login");
+      login(accessToken, user);
+      navigate(location.state?.from ?? "/", { replace: true });
+    } catch (error) {
+      if (error instanceof Error && error.name === 'TimeoutError') {
+        toast.error("Please check your network connection")
+      } else {
+        toast.error(error instanceof Error ? error.message : "Failed to login");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -86,13 +109,13 @@ export function LoginForm({
                   type="email"
                   placeholder="m@example.com"
                   {...register("email")}
-                  aria-invalid={!!errors.password}
+                  aria-invalid={!!errors.email}
                   disabled={isLoading}
                   required
                 />
-                {errors.password && (
+                {errors.email && (
                   <FieldDescription>
-                    {errors.password.message}
+                    {errors.email.message}
                   </FieldDescription>
                 )}
               </Field>
@@ -122,7 +145,7 @@ export function LoginForm({
                   {isLoading ? "Logging in" : "Login"}
                 </Button>
                 <FieldDescription className="text-center">
-                  Don&apos;t have an account? <a href="/register">Sign up</a>
+                  Don&apos;t have an account? <Link to="/register">Sign up</Link>
                 </FieldDescription>
               </Field>
             </FieldGroup>

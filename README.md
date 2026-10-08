@@ -7,7 +7,7 @@ An admin web app for managing blog posts from an external API, built using React
 - **UI Library**: React 19
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS 4
-- **UI Components**: shadcn/ui
+- **UI Components**: [shadcn/ui](https://ui.shadcn.com/)
 - **Icons**: Lucide React
 - **State Management**: React Context API
 - **Package Manager**: pnpm
@@ -17,6 +17,12 @@ An admin web app for managing blog posts from an external API, built using React
 
 1. Backend server running on <http://localhost:3000>
 2. PostgreSQL database configured and migrated
+
+## Tools
+
+- [CodeRabbit](https://app.coderabbit.ai/explore): A pull request reviewer
+- [Vercel](https://vercel.com/): For frontend deployment
+- [Cloudflare](https://cloudflare.com): For DNS Management
 
 ## Acknowledgements
 

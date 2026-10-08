@@ -18,6 +18,9 @@ import { z } from "zod"
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner"
+import { Link, useNavigate } from "react-router"
+import { API_URL } from "@/lib/api"
+import { useAuth } from "@/lib/auth-context"
 
 const registerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -30,12 +33,12 @@ const registerSchema = z.object({
 })
 
 type RegisterInput = z.infer<typeof registerSchema>;
-
-const API_URL = import.meta.env.VITE_API_URL;
 const IS_DEV = import.meta.env.DEV;
 
 export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
   const {
     register,
@@ -53,36 +56,55 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
   });
 
   const onSubmit: SubmitHandler<RegisterInput> = async (data: RegisterInput) => {
-    console.log("Data:", data);
-    
     setIsLoading(true);
 
     try {
       const response = await fetch(`${API_URL}/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json"},
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           name: data.name,
           email: data.email,
           password: data.password
         }),
-        credentials: "include",
+        signal: AbortSignal.timeout(5000)
       });
 
-      console.log("Response:", response);
-      
-
       if (!response.ok) {
-        const errorData = await response.json();
-        console.log("errorData", errorData)
-        throw new Error(errorData.error);
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error ?? "Failed to sign-up");
       }
 
-      toast("Account created successfully");
       reset();
-    } catch (error: any) {
-      console.log("error", error)
-      toast(error instanceof Error ? error.message : "Failed to register")
+
+      try {
+        const loginResponse = await fetch(`${API_URL}/api/auth/login`, {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json"},
+          body: JSON.stringify({
+            email: data.email,
+            password: data.password
+          }),
+          signal: AbortSignal.timeout(5000)
+        });
+
+        if (!loginResponse.ok) throw new Error("post-registration login failed");
+
+        const { accessToken, user } = await loginResponse.json();
+        toast("Account created successfully");
+        login(accessToken, user);
+        navigate("/");
+      } catch {
+        toast("Account created successfully. Please sign in.");
+        navigate("/login");
+      }
+    } catch (error) {
+      if (error instanceof Error && error.name === 'TimeoutError') {
+        toast.error("Please check your network connection")
+      } else {
+        toast.error(error instanceof Error ? error.message : "Failed to register")
+      }
     } finally {
       setIsLoading(false);
     }
@@ -182,7 +204,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
                   {isLoading ? "Registering" : "Create Account"}
                 </Button>
                 <FieldDescription className="px-6 text-center">
-                  Already have an account? <a href="/login" aria-disabled={isLoading}>Sign in</a>
+                  Already have an account? <Link to="/login" aria-disabled={isLoading}>Sign in</Link>
                 </FieldDescription>
               </Field>
             </FieldGroup>
