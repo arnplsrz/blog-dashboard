@@ -20,6 +20,7 @@ import { useState } from "react"
 import { toast } from "sonner"
 import { useForm, type SubmitHandler } from "react-hook-form"
 import { Link, useLocation, useNavigate } from "react-router"
+import { API_URL } from "@/lib/api"
 import { useAuth } from "@/lib/auth-context"
 
 const loginSchema = z.object({
@@ -28,8 +29,6 @@ const loginSchema = z.object({
 })
 
 type LoginInput = z.infer<typeof loginSchema>
-
-const API_URL = import.meta.env.VITE_API_URL;
 const IS_DEV = import.meta.env.DEV;
 
 export function LoginForm({

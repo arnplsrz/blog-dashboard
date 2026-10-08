@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react"
 import { Navigate, Outlet, useLocation } from "react-router"
 
+import { API_URL } from "@/lib/api"
 import { AuthContext, useAuth, type User } from "@/lib/auth-context"
 import { Toaster, toast } from "sonner"
-
-const API_URL = import.meta.env.VITE_API_URL
 
 type Session = { accessToken: string; user: User }
 

@@ -19,6 +19,7 @@ import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner"
 import { Link, useNavigate } from "react-router"
+import { API_URL } from "@/lib/api"
 import { useAuth } from "@/lib/auth-context"
 
 const registerSchema = z.object({
@@ -32,8 +33,6 @@ const registerSchema = z.object({
 })
 
 type RegisterInput = z.infer<typeof registerSchema>;
-
-const API_URL = import.meta.env.VITE_API_URL;
 const IS_DEV = import.meta.env.DEV;
 
 export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
