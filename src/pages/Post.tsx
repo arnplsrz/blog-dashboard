@@ -36,6 +36,7 @@ function Post() {
   const [notFound, setNotFound] = useState(false)
   const [content, setContent] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [editing, setEditing] = useState<{ id: string; content: string } | null>(null)
 
   useEffect(() => {
     let active = true
@@ -83,6 +84,35 @@ function Post() {
     }
   }
 
+  const onSaveEdit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (!editing) return
+
+    try {
+      const data = await send(`/api/comments/${editing.id}`, "PATCH", { content: editing.content })
+      setPost((post) => post && {
+        ...post,
+        comments: post.comments.map((comment) =>
+          comment.id === editing.id ? { ...comment, content: data.comment.content } : comment
+        ),
+      })
+      setEditing(null)
+    } catch (error) {
+      showError(error)
+    }
+  }
+
+  const onDelete = async (id: string) => {
+    if (!window.confirm("Delete this comment?")) return
+
+    try {
+      await send(`/api/comments/${id}`, "DELETE")
+      setPost((post) => post && { ...post, comments: post.comments.filter((comment) => comment.id !== id) })
+    } catch (error) {
+      showError(error)
+    }
+  }
+
   if (notFound) return <p className="p-6">Post not found. <Link to="/" className="underline">Back to posts</Link></p>
   if (!post) return null
 
@@ -103,7 +133,30 @@ function Post() {
             <p className="text-sm text-muted-foreground">
               {comment.author.name ?? "Unknown"} · <time dateTime={comment.createdAt}>{formatDate(comment.createdAt)}</time>
             </p>
-            <p className="whitespace-pre-wrap">{comment.content}</p>
+            {editing?.id === comment.id ? (
+              <form onSubmit={onSaveEdit} className="flex flex-col gap-2">
+                <textarea
+                  aria-label="Edit comment"
+                  className="min-h-24 rounded-md border p-2"
+                  value={editing.content}
+                  onChange={(event) => setEditing({ id: comment.id, content: event.target.value })}
+                  maxLength={2000}
+                  required
+                />
+                <div className="flex gap-2">
+                  <Button type="submit" size="sm">Save</Button>
+                  <Button type="button" size="sm" variant="outline" onClick={() => setEditing(null)}>Cancel</Button>
+                </div>
+              </form>
+            ) : (
+              <p className="whitespace-pre-wrap">{comment.content}</p>
+            )}
+            {user && (user.id === comment.author.id || user.role === "AUTHOR") && editing?.id !== comment.id && (
+              <div className="mt-2 flex gap-2">
+                <Button size="sm" variant="outline" onClick={() => setEditing({ id: comment.id, content: comment.content })}>Edit</Button>
+                <Button size="sm" variant="destructive" onClick={() => onDelete(comment.id)}>Delete</Button>
+              </div>
+            )}
           </article>
         ))}
         {user ? (
