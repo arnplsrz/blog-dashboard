@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react"
-import { Navigate, Outlet, useLocation } from "react-router"
 
 import { API_URL } from "@/lib/api"
-import { AuthContext, useAuth, type User } from "@/lib/auth-context"
+import { AuthContext, type User } from "@/lib/auth-context"
 import { Toaster, toast } from "sonner"
 
 type Session = { accessToken: string; user: User }
@@ -97,15 +96,4 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       <Toaster />
     </AuthContext>
   )
-}
-
-export function ProtectedRoute() {
-  const { user, isLoading } = useAuth()
-  const location = useLocation()
-
-  if (isLoading) return null
-
-  if (!user) return <Navigate to="/login" replace state={{ from: location.pathname }} />
-
-  return user.role === "AUTHOR" ? <Outlet /> : <Navigate to="/" replace />
 }
